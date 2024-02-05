@@ -29,13 +29,19 @@ class LogisticRegression():
 
             ll = np.sum(y * np.log(mu) + (1 - y) * np.log(1 - mu))
             curr_tol = np.abs(ll - ll_old)
-        
+
+        self.beta = beta
         return {
             'beta': beta,
             'iter': it,
             'tol': curr_tol,
             'loglik': ll
         }
+    
+    def predict(self, x):
+        if self.beta is None:
+            print("Model needs to be trained before you can make predictions")
+        return self.logistic_function(np.dot(self.beta.transpose(), x.transpose()))
 
 
 
