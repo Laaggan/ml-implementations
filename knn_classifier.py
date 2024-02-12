@@ -28,7 +28,6 @@ class KnnClassifier:
             result[i] = euclidean_distance(x_i, x)
         
         sort_index = np.argsort(result)
-        sort_index = sort_index[::-1]
 
         knn_index = sort_index[:self.K]
         nn = Y[knn_index]
