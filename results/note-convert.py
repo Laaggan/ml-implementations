@@ -77,3 +77,74 @@ sklearn_model = SklearnLogisticRegression(random_state=0).fit(X_1, y_1)
 sklearn_y_hat = sklearn_model.predict(X_1)
 print("accuracy sklearn implementation:", sum(sklearn_y_hat.round() == y_1)/len(y_1))
 
+
+# In[22]:
+
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from knn_classifier import KnnClassifier
+
+data = open("breast-cancer-wisconsin.data.txt").read()
+
+df = pd.read_csv("breast-cancer-wisconsin.data.txt", header=None)
+col_names = ['Id', 'Clump_thickness', 'Uniformity_Cell_Size', 'Uniformity_Cell_Shape', 'Marginal_Adhesion', 
+             'Single_Epithelial_Cell_Size', 'Bare_Nuclei', 'Bland_Chromatin', 'Normal_Nucleoli', 'Mitoses', 'Class']
+
+df.columns = col_names
+df.drop('Id', axis=1, inplace=True)
+df['Bare_Nuclei'] = pd.to_numeric(df['Bare_Nuclei'], errors='coerce')
+
+# Just dropping nan gives accuracy of 0.9708
+df.dropna(inplace=True)
+
+X = df.drop(['Class'], axis=1)
+Y = df['Class']
+
+# Interpolate instead of dropping nan gives accuracy 0.9714
+# for col in X.columns:
+#         col_median=X[col].median()
+#         X[col].fillna(col_median, inplace=True)
+
+X = np.array(X)
+Y = np.array(Y)
+
+# #This is bad but it works for now
+transformed_data = np.zeros(X.shape)
+for col_i in range(X.shape[1]):
+    current_column = X[:, col_i]
+    mu = np.mean(current_column)
+    sigma = np.std(current_column)    
+    normalized_column = np.array((current_column - mu)/sigma)
+    transformed_data[:, col_i] = normalized_column
+
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
+
+# TODO: Support making predictions on multiple rows like sklearn model
+p = 2
+knn_classifier = KnnClassifier(K=3, p=p)
+num_correct = 0
+Y_pred_my_model = []
+for x, y in zip(X_test, Y_test):
+    result = knn_classifier.predict(X_train, Y_train, x)
+    Y_pred_my_model.append(result)
+Y_pred_my_model = np.array(Y_pred_my_model)
+
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, Y_train)
+
+Y_pred_sklearn_model = knn.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+print('My model accuracy score: {0:0.4f}'. format(accuracy_score(Y_test, Y_pred_my_model)))
+print('Sklearn model accuracy score: {0:0.4f}'. format(accuracy_score(Y_test, Y_pred_sklearn_model)))
+
+
+# In[ ]:
+
+
+
+
