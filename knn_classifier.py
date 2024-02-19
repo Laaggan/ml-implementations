@@ -29,6 +29,13 @@ class KnnClassifier:
     def fit(self, X):
         pass
 
+    def predict_many(self, X, Y, X_many):
+        Y_hat = np.zeros(len(X_many))
+        for i, x in enumerate(X_many):
+            y_hat = self.predict(X, Y, x)
+            Y_hat[i] = y_hat
+        return Y_hat
+
     def predict(self, X, Y, x):
         result = np.zeros(X.shape[0])
         for i, x_i in enumerate(X):
